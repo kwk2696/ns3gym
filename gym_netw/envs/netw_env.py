@@ -9,12 +9,17 @@ from gym_netw.envs.netw import Server
 class NetwEnv(gym.Env):
     metadata = {'render.modes': ['human']}
     
-    def __init__(self):
+    def __init__(self, isDiscrete=True):
         self.server = Server (5050, 3)
+        self.isDiscrete = isDiscrete
         
-        self.action_space = spaces.Discrete (3)
+        if isDiscrete:
+            self.action_space = spaces.Discrete (3);
+        else:
+            self.action_space = spaces.Box (low=-1, high=1, shape=(3,), dtype=np.float32)
+            
         #self.observation_space = spaces.Tuple ((spaces.Discrete(1), spaces.Discrete(1), spaces.Discrete(1)))
-        self.observation_space = spaces.Box (low=0, high=1, shape=(1,3))
+        self.observation_space = spaces.Box (low=0, high=1, shape=(3,), dtype=np.float32)
         
 
     def step(self, action):
@@ -27,7 +32,7 @@ class NetwEnv(gym.Env):
         # print(obs)
         # done = self.server._end ()
         # print(done)
-        self.server._action (action)
+        self.server._action (action, self.isDiscrete)
         obs, reward = self.server._communicate ()
         #reward = -reward
         # if reward != 0:

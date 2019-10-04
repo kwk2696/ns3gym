@@ -19,7 +19,7 @@ class Server():
         recv = self._recv ()
         dict = json.loads (recv)
         
-        obs = np.zeros ((1, self.m_obsize))
+        obs = np.zeros ((self.m_obsize,))
         reward = 0
         # iter = 0
         for key in dict:
@@ -28,14 +28,14 @@ class Server():
                 break
                 
             if key == 'state0':
-                obs[0][0] = dict[key]
+                obs[0] = dict[key]
             if key == 'state1':
-                obs[0][1] = dict[key]
+                obs[1] = dict[key]
             if key == 'state2':
-                obs[0][2] = dict[key]
+                obs[2] = dict[key]
             # obs[0][iter] = dict[key]
             # iter += 1
-        
+            
         self.m_socket.send(b"1")
         return obs, reward
     
@@ -56,9 +56,18 @@ class Server():
             
         return obs
         
-    def _action (self, action):
+    def _action (self, action, isDiscrete):
         recv = self._recv ()
+    
         snd = str(action).encode ()
+        if not isDiscrete :
+            if (action[0] >= action[1]) and (action[0] >= action[2]):
+                snd = str(0).encode ()
+            elif (action[1] >= action[0]) and (action[1] >= action[2]):
+                snd = str(1).encode ()
+            else:
+                snd = str(2).encode ()
+
         self.m_socket.send (snd)
     
     def _reward (self):
